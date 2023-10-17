@@ -1,0 +1,8 @@
+{
+    "title": "concrete delivery testing title",
+    "description": "testing description for metadata.",
+    "page": "concrete-delivery",
+    "google_console_key": "this is google console key",
+    "yandex_console_key": "this is yandex console key",
+    "yahoo_console_key": "this is yahoo console key"
+}
