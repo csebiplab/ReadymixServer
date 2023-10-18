@@ -22,17 +22,17 @@ const metadataSchema = new Schema(
         },
         google_console_key: {
             type: String,
-            required: [true, "google_console_key is required"],
+            // required: [true, "google_console_key is required"],
             trim: true,
         },
         yandex_console_key: {
             type: String,
-            required: [true, "yandex_console_key is required"],
+            // required: [true, "yandex_console_key is required"],
             trim: true,
         },
         yahoo_console_key: {
             type: String,
-            required: [true, "yahoo_console_key is required"],
+            // required: [true, "yahoo_console_key is required"],
             trim: true,
         },
     },
