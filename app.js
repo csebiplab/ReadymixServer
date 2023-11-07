@@ -36,6 +36,7 @@ const metadataRoute = require("./api/v1/routes/seo-credentials/metadata.routes")
 const robotTxtRoute = require("./api/v1/routes/seo-credentials/robot-txt.routes");
 const searchConsoleRoute = require("./api/v1/routes/seo-credentials/search-console.routes");
 const sitemapRoute = require("./api/v1/routes/seo-credentials/sitemap.routes");
+const User = require("./allDataDb/userCollection/User");
 // routes------------>
 app.use("/api/v1/metadata", metadataRoute);
 app.use("/api/v1/robot-txt", robotTxtRoute);
@@ -44,6 +45,25 @@ app.use("/api/v1/sitemap", sitemapRoute);
 
 app.get("/", (req, res) => {
     res.send("this is server");
+});
+app.post('/users', async (req, res) => {
+    const user = req.body;
+    const query = { email: user.email };
+    const existingUser = await User.findOne(query);
+
+    if (existingUser) {
+        return res.json({ message: 'User already exists' });
+    }
+
+    try {
+        const newUser = new User(user);
+        await newUser.save();
+
+        res.json({ message: 'User added successfully', user: newUser });
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).json({ message: 'Error adding user' });
+    }
 });
 
 app.use((req, res, next) => {
