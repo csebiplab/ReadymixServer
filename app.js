@@ -37,6 +37,7 @@ const robotTxtRoute = require("./api/v1/routes/seo-credentials/robot-txt.routes"
 const searchConsoleRoute = require("./api/v1/routes/seo-credentials/search-console.routes");
 const sitemapRoute = require("./api/v1/routes/seo-credentials/sitemap.routes");
 const User = require("./allDataDb/userCollection/User");
+const PostCollect = require("./allDataDb/PostCollection/postCollection");
 // routes------------>
 app.use("/api/v1/metadata", metadataRoute);
 app.use("/api/v1/robot-txt", robotTxtRoute);
@@ -65,6 +66,94 @@ app.post('/users', async (req, res) => {
         res.status(500).json({ message: 'Error adding user' });
     }
 });
+app.post('/api/post', async (req, res) => {
+    try {
+        const { name, description, image, quillValue } = req.body;
+        const newPost = new PostCollect({
+            name,
+            description,
+            image,
+            quillValue,
+        });
+        const savedPost = await newPost.save();
+
+        res.status(201).json(savedPost);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.get('/api/posts', async (req, res) => {
+    try {
+        const posts = await PostCollect.find();
+
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/api/posts/:id', async (req, res) => {
+    const postId = req.params.id;
+    try {
+        const post = await PostCollect.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        res.status(200).json(post);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.delete('/api/blog/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const deletedPost = await PostCollect.findByIdAndDelete(postId)
+        if (!deletedPost) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        res.json({ message: 'Post deleted successfully', deletedPost });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.put('/blog-post-update/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const updateInfo = req.body;
+        const existingPost = await PostCollect.findById(postId);
+        if (!existingPost) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        const updatedPost = await PostCollect.findByIdAndUpdate(postId, updateInfo, { new: true });
+        res.json({ message: 'Post updated successfully', updatedPost });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+// here i make search text from the admin dashboard 
+app.get('/search-blog', async (req, res) => {
+    try {
+        const searchText = req.query.search;
+        const filter = {
+            $or: [
+                { name: { $regex: searchText, $options: 'i' } },
+                { description: { $regex: searchText, $options: 'i' } },
+            ],
+        };
+        const posts = await PostCollect.find(filter);
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 app.use((req, res, next) => {
     createError(404, "Route not found");
